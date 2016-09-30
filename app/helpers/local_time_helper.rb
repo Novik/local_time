@@ -15,8 +15,12 @@ module LocalTimeHelper
 
   def local_date(time, options = nil)
     options, format = extract_options_and_value(options, :format)
-    options[:format] = format || '%B %e, %Y'
-    local_time time, options
+    format = find_date_format(format)
+
+    options[:data] ||= {}
+    options[:data].merge! local: :time, format: format
+
+    time_tag time, time.strftime(format), options
   end
 
   def local_relative_time(time, options = nil)
@@ -47,6 +51,20 @@ module LocalTimeHelper
     def find_time_format(format)
       if format.is_a?(Symbol)
         if (i18n_format = I18n.t("time.formats.#{format}", default: [:"date.formats.#{format}", ''])).present?
+          i18n_format
+        elsif (date_format = Time::DATE_FORMATS[format] || Date::DATE_FORMATS[format])
+          date_format.is_a?(Proc) ? DEFAULT_FORMAT : date_format
+        else
+          DEFAULT_FORMAT
+        end
+      else
+        format.presence || DEFAULT_FORMAT
+      end
+    end
+
+    def find_date_format(format)
+      if format.is_a?(Symbol)
+        if (i18n_format = I18n.t("date.formats.#{format}")).present?
           i18n_format
         elsif (date_format = Time::DATE_FORMATS[format] || Date::DATE_FORMATS[format])
           date_format.is_a?(Proc) ? DEFAULT_FORMAT : date_format

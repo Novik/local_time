@@ -6,8 +6,8 @@ class LocalTime.RelativeTime
   constructor: (@date) ->
     @calendarDate = LocalTime.CalendarDate.fromDate(@date)
 
-  toString: ->
-    if time = @toTimeElapsedString()
+  toString: (force = false) ->
+    if time = @toTimeElapsedString(force)
       translate("time.elapsed", {time})
     else if date = @toWeekdayString()
       time = @toTimeString()
@@ -21,31 +21,50 @@ class LocalTime.RelativeTime
     else
       @toDateString()
 
-  toTimeElapsedString: ->
+  toTimeElapsedString: (force = false) ->
     ms = new Date().getTime() - @date.getTime()
     seconds = Math.round ms / 1000
     minutes = Math.round seconds / 60
     hours = Math.round minutes / 60
-
+    days = Math.round hours / 24
+    months = Math.round days / 30
+    years = Math.round months / 12
     if ms < 0
       null
     else if seconds < 10
       time = translate("time.second")
       translate("time.singular", {time})
     else if seconds < 45
-      "#{seconds} #{translate("time.seconds")}"
+      "#{seconds} #{translate("time.seconds", {}, seconds)}"
     else if seconds < 90
       time = translate("time.minute")
       translate("time.singular", {time})
     else if minutes < 45
-      "#{minutes} #{translate("time.minutes")}"
+      "#{minutes} #{translate("time.minutes", {}, minutes)}"
     else if minutes < 90
       time = translate("time.hour")
       translate("time.singularAn", {time})
     else if hours < 24
-      "#{hours} #{translate("time.hours")}"
-    else
-      ""
+      "#{hours} #{translate("time.hours", {}, hours)}"
+    else 
+      if force
+        if hours < 36
+          time = translate("time.day")
+          translate("time.singular", {time})
+        else if days < 30
+          "#{days} #{translate("time.days", {}, days)}"
+        else if days < 45
+          time = translate("time.month")
+          translate("time.singular", {time})
+        else if months < 12
+          "#{months} #{translate("time.months", {}, months)}"
+        else if months < 18
+          time = translate("time.year")
+          translate("time.singular", {time})
+        else
+          "#{years} #{translate("time.years", {}, years)}"
+      else
+        ""
 
   toWeekdayString: ->
     switch @calendarDate.daysPassed()

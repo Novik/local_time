@@ -29,7 +29,7 @@ class LocalTime.Controller
     datetime = element.getAttribute("datetime")
     format = element.getAttribute("data-format")
     local = element.getAttribute("data-local")
-
+    force = element.getAttribute("data-force")
     time = parseDate(datetime)
     return if isNaN time
 
@@ -45,7 +45,7 @@ class LocalTime.Controller
         markAsLocalized(element)
         relative(time).toDateString()
       when "time-ago"
-        relative(time).toString()
+        relative(time).toString(force)
       when "time-or-date"
         relative(time).toTimeOrDateString()
       when "weekday"
